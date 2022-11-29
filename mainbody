@@ -1,15 +1,39 @@
 // Object with all words goes here, removed in this file for sake of brevity
 
-let invalidLetters = "abcdefghijklmnopqrstuvwxyz"
+let wordArr = [];
 
-for (const prop in letterObj) {
+let letterObj = { // Top: 1, Right: 2, Bottom: 3, Left: 4
+    "r": 1,
+    "i": 1,
+    "n": 1,
+    "w": 2,
+    "a": 2,
+    "l": 2,
+    "e": 3,
+    "g": 3,
+    "o": 3,
+    "s": 4,
+    "h": 4,
+    "c": 4
+};
+
+// let invalidLetters = "abcdefghijklmnopqrstuvwxyz"
+let invalidLetters = "bdfjkmpqtuvxyz"
+// let invalidLetters = "bhjklmqsuvwxyz"
+
+// for (const prop in letterObj) {
     // Splice the valid letters out of invalidLetters
-}
+// }
 
 for (const prop in wordDict) {
     for (let i = 0; i < prop.length; i++) {
+        if (invalidLetters.includes(prop[i])){
+            wordDict[prop] = 0;
+            break;
+        }
         if (i > 0 && prop[i] == prop[i-1]) {
             wordDict[prop] = 0;
+            break;
         }
     }
     if (wordDict[prop] == 1) {
@@ -26,4 +50,84 @@ for (const prop in wordDict) {
     }
 }
 
-console.log(wordArr);
+// At this point, we've narrowed the list down by nearly 350,000.
+// Remaining words have only valid letters, and there are no double letters.
+// Now we need to map the list so that it's in order from longest to shortest.
+
+wordArr.sort((a,b) => b.length - a.length)
+
+// Now we need to eliminate words that have adjacent letters on the same side of the box.
+
+let refinedWordArr = []
+
+for (var i = 0; i < wordArr.length; i++) {
+    let valid = true;
+    let boxSide = letterObj[wordArr[i][0]];
+    for (var j = 1; j < wordArr[i].length; j++) {
+        if (letterObj[wordArr[i][j]] == boxSide) {
+            valid = false;
+            break;
+        }
+        else boxSide = letterObj[wordArr[i][j]];
+    }
+    if (valid) {
+        refinedWordArr.push(wordArr[i])
+    }
+}
+
+// We now have a refined word list that only contains valid words according to the constraints.
+// Notably, NY Times may not necessarily accept all of these words.
+// Unsure how to implement that sort of filter without getting a list of their words.
+
+// Next, I want to make nine arrays, one for each starting letter. This'll save a lot of time later.
+
+let firstLetterListsObj = {
+    "r": [],
+    "i": [],
+    "n": [],
+    "w": [],
+    "a": [],
+    "l": [],
+    "e": [],
+    "g": [],
+    "o": [],
+    "s": [],
+    "h": [],
+    "c": []
+}
+
+for (var i = 0; i < refinedWordArr.length; i++) {
+    firstLetterListsObj[refinedWordArr[i][0]].push(refinedWordArr[i]);
+}
+
+//Moving forward, we now have to pick a starting word and see if there is a follow-up that solves it.
+// Now we go note which letters appear in a word and which ones we still need.
+
+let winningArr = []
+
+for (var i = 0; i < refinedWordArr.length; i++) {
+    let remainingLetters = ""
+    for (const prop in letterObj) {
+        if (!refinedWordArr[i].includes(prop)) {
+            remainingLetters += prop;
+        }
+    } // We have now selected a word and established the remaining letters
+    let lastLetter = refinedWordArr[i][refinedWordArr[i].length-1]
+    for (var j = 0; j < firstLetterListsObj[lastLetter].length; j++) {
+        let valid = true;
+        for (var k = 0; k < remainingLetters.length; k++) {
+            if (!firstLetterListsObj[lastLetter][j].includes(remainingLetters[k])) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid) {
+            winningArr.push(refinedWordArr[i] + " - " + firstLetterListsObj[lastLetter][j])
+        }
+    }
+}
+
+console.log(winningArr);
+
+// It works!!!!! Now I just need to eliminate words that NY Times doesn't accept....
+// Also: Automate the two first letter objects and the invald letters to require one edit for new puzzles.
