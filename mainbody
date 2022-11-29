@@ -1,0 +1,29 @@
+// Object with all words goes here, removed in this file for sake of brevity
+
+let invalidLetters = "abcdefghijklmnopqrstuvwxyz"
+
+for (const prop in letterObj) {
+    // Splice the valid letters out of invalidLetters
+}
+
+for (const prop in wordDict) {
+    for (let i = 0; i < prop.length; i++) {
+        if (i > 0 && prop[i] == prop[i-1]) {
+            wordDict[prop] = 0;
+        }
+    }
+    if (wordDict[prop] == 1) {
+        wordDict[prop] = 0;
+        for (const firstLetter in letterObj) { //This is only checking if they have the letters, not checking for invalids
+            if (prop.includes(firstLetter)) {
+                wordDict[prop] = 1;
+                break;
+            }
+        }
+    }
+    if (wordDict[prop] == 1) {
+        wordArr.push(prop);
+    }
+}
+
+console.log(wordArr);
